@@ -7,6 +7,7 @@ using Share.Exceptions;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Akosta.API.Controllers
 {
@@ -106,6 +107,30 @@ namespace Akosta.API.Controllers
         }
 
         /// <summary>
+        /// Возвращает всех пользователей по фильтрам
+        /// </summary>
+        /// <param name="critetia">Кретерии через пробел</param>
+        [ProducesResponseType(typeof(List<UserInformationDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPost("[action]")]
+        public async Task<ActionResult<List<UserInformationDto>>> GetAllUserOfCriteria(UserCritetiaDto userCritetiaDto)
+        {
+            UserCritetiaBlo userCritetiaBlo = _mapper.Map<UserCritetiaBlo>(userCritetiaDto);
+            List<UserInformationBlo> userInformationBlos = new List<UserInformationBlo>();
+
+            try
+            {
+                userInformationBlos = await _userService.GetAllUserOfCriteria(userCritetiaBlo);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+
+            return Ok(ConvertToListUserInformationDto(userInformationBlos));
+        }
+
+        /// <summary>
         /// Проверяет, существует ли пользователь с указанным id
         /// </summary>
         /// <param name="userId">Идентификатор пользователя</param>
@@ -143,6 +168,19 @@ namespace Akosta.API.Controllers
 
             UserInformationDto userInformationDto = _mapper.Map<UserInformationDto>(userInformationBlo);
             return userInformationDto;
+        }
+
+        private List<UserInformationDto> ConvertToListUserInformationDto(List<UserInformationBlo> userInformationBlos)
+        {
+            if (userInformationBlos == null)
+                throw new ArgumentNullException(nameof(userInformationBlos));
+
+            List<UserInformationDto> userInformationDtos = new List<UserInformationDto>();
+            for (int i = 0; i < userInformationBlos.Count; i++)
+            {
+                userInformationDtos.Add(ConvertToUserInformationDto(userInformationBlos[i]));
+            }
+            return userInformationDtos;
         }
     }
 }

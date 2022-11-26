@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Akosta.BusinessLogic.Core.Interfaces;
+using Akosta.BusinessLogic.Core.Models;
 
 namespace Akosta.API.Controllers
 {
@@ -27,24 +28,22 @@ namespace Akosta.API.Controllers
         }
 
         /// <summary>
-        /// Добавляет тренировку и возвращает информацию о ней
+        /// Добавляет обучение и возвращает информацию о нём
         /// </summary>
-        /// <param name="userWhoTrainingId">Id пользователя, к которому надо добавить тренировку</param>
-        /// <param name="exercise">Упражнение</param>
-        /// <param name="isDone">Сделано ли упражнение</param>
-        /// <param name="workoutTime">Время всей тренировки</param>
-        /// <param name="startWorkoutDate">Время начала тренировки</param>
+        /// <param name="UserId">Id пользователя, к которому надо добавить обучение</param>
+        /// <param name="SkillsInCource">Как называется</param>
+        /// <param name="Store">На сколько процентов сделано</param>
         [ProducesResponseType(typeof(StudyInformationDto), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [HttpPost("[action]")]
-        public async Task<ActionResult<StudyInformationDto>> AddWorkoutPlan(StudyAddDto workoutPlanAddDto)
+        public async Task<ActionResult<StudyInformationDto>> AddStudy(StudyAddDto studyAddDto)
         {
-            WorkoutPlanAddBlo workoutPlanAddBlo = _mapper.Map<WorkoutPlanAddBlo>(workoutPlanAddDto);
-            WorkoutInformationBlo workoutInformationBlo = new WorkoutInformationBlo();
+            StudyAddBlo studyAddBlo = _mapper.Map<StudyAddBlo>(studyAddDto);
+            StudyInformationBlo studyInformationBlo = new StudyInformationBlo();
             try
             {
-                workoutInformationBlo = await _workoutService.AddWorkoutPlan(workoutPlanAddBlo);
+                studyInformationBlo = await _studyService.AddStudy(studyAddBlo);
             }
             catch (NotFoundException e)
             {
@@ -58,126 +57,105 @@ namespace Akosta.API.Controllers
             {
                 return BadRequest(e.Message);
             }
-            return Created("", ConvertToWorkoutInformationDto(workoutInformationBlo));
+            return Created("", ConvertToStudyInformationDto(studyInformationBlo));
         }
 
-/*        /// <summary>
-        /// Обновляет информацию тренировки и возвращает информацию о ней
-        /// </summary>
-        /// <param name="workoutPlanId">Идентификатор тренировки</param>
-        /// <param name="exercise">Упражнение</param>
-        /// <param name="workoutTime">Время начала</param>
-        [ProducesResponseType(typeof(WorkoutInformationDto), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpPatch("[action]/{workoutPlanId}")]
-        public async Task<ActionResult<WorkoutInformationDto>> UpdateWorkoutPlan([FromRoute] int workoutPlanId, [FromBody] WorkoutPlanUpdateDto workoutPlanUpdateDto)
-        {
-            WorkoutPlanUpdateBlo workoutPlanUpdateBlo = _mapper.Map<WorkoutPlanUpdateBlo>(workoutPlanUpdateDto);
-            WorkoutInformationBlo workoutInformationBlo;
-
-            try
-            {
-                workoutInformationBlo = await _workoutService.UpdateWorkoutPlan(workoutPlanId, workoutPlanUpdateBlo);
-            }
-            catch (NotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-
-            return Ok(ConvertToWorkoutInformationDto(workoutInformationBlo));
-
-        }*/
-
         /// <summary>
-        /// Возвращает тренировку с указанным id
+        /// Обновляет рейтинг прохождения курса у юзера
         /// </summary>
-        /// <param name="workoutPlanId">Идентификатор тренировки</param>
+        /// <param name="studyId">Идентификатор курса у чела</param>
+        /// <param name="store">На сколько процентов юзер прошёл его</param>
         [ProducesResponseType(typeof(StudyInformationDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("[action]/{workoutPlanId}")]
-        public async Task<ActionResult<StudyInformationDto>> GetWorkoutPlan(int workoutPlanId)
+        [HttpPatch("[action]/{studyId}/{store}")]
+        public async Task<ActionResult<StudyInformationDto>> UpdateStudy(int studyId, int store)
         {
-            WorkoutInformationBlo workoutInformationBlo;
+            StudyInformationBlo studyInformationBlo;
 
             try
             {
-                workoutInformationBlo = await _workoutService.GetWorkoutPlan(workoutPlanId);
+                studyInformationBlo = await _studyService.UpdateStudy(studyId, store);
             }
             catch (NotFoundException e)
             {
                 return NotFound(e.Message);
             }
 
-            return Ok(ConvertToWorkoutInformationDto(workoutInformationBlo));
+            return Ok(ConvertToStudyInformationDto(studyInformationBlo));
+
         }
 
         /// <summary>
-        /// Возвращает все тренировки у указанного пользователя по userId
+        /// Возвращает обучение по id
+        /// </summary>
+        /// <param name="studyId">Идентификатор обучения</param>
+        [ProducesResponseType(typeof(StudyInformationDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpGet("[action]/{studyId}")]
+        public async Task<ActionResult<StudyInformationDto>> GetStudy(int studyId)
+        {
+            StudyInformationBlo studyInformationBlo;
+
+            try
+            {
+                studyInformationBlo = await _studyService.GetStudy(studyId);
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+
+            return Ok(ConvertToStudyInformationDto(studyInformationBlo));
+        }
+
+        /// <summary>
+        /// Возвращает все обучения по id юзера
         /// </summary>
         /// <param name="userId">Идентификатор пользователя</param>
-        /// <param name="count">Сколько тренировок требуется</param>
-        /// <param name="skipCount">Сколько тренировок уже есть</param>
+        /// <param name="count">Сколько обучений требуется</param>
+        /// <param name="skipCount">Сколько обучений уже есть</param>
         [ProducesResponseType(typeof(List<StudyInformationDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpGet("[action]/{userId}/{count}/{skipCount}")]
-        public async Task<ActionResult<List<StudyInformationDto>>> GetAllWorkoutPlans(int userId, int count, int skipCount)
+        public async Task<ActionResult<List<StudyInformationDto>>> GetAllStudy(int userId, int count, int skipCount)
         {
-            List<WorkoutInformationBlo> workoutInformationBlos = new List<WorkoutInformationBlo>();
+            List<StudyInformationBlo> studyInformationBlos = new List<StudyInformationBlo>();
 
             try
             {
-                workoutInformationBlos = await _workoutService.GetAllWorkoutPlans(userId, count, skipCount);
+                studyInformationBlos = await _studyService.GetAllStudy(userId, count, skipCount);
             }
             catch (NotFoundException e)
             {
                 return NotFound(e.Message);
             }
 
-            return Ok(ConvertToListWorkoutInformationDto(workoutInformationBlos));
+            return Ok(ConvertToListWorkoutInformationDto(studyInformationBlos));
         }
 
         /// <summary>
-        /// Возвращает количество тренировок у указанного пользователя c userId
+        /// Проверяет, существует ли обучение с указанным id
         /// </summary>
-        /// <param name="userId">Идентификатор пользователя</param>
-        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("[action]/{userId}")]
-        public async Task<ActionResult<int>> GetWorkoutCount(int userId)
-        {
-            try
-            {
-                return Ok(await _workoutService.GetWorkoutCount(userId));
-            }
-            catch (NotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-        }
-
-        /// <summary>
-        /// Проверяет, существует ли тренировка с указанным id
-        /// </summary>
-        /// <param name="workoutPlanId">Идентификатор тренировки</param>
+        /// <param name="studyId">Идентификатор обучения</param>
         [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
-        [HttpGet("[action]/{workoutPlanId}")]
-        public async Task<ActionResult<bool>> DoesExistWorkout(int workoutPlanId)
+        [HttpGet("[action]/{studyId}")]
+        public async Task<ActionResult<bool>> DoesExistStudy(int studyId)
         {
-            return Ok(await _workoutService.DoesExistWorkout(workoutPlanId));
+            return Ok(await _studyService.DoesExistStudy(studyId));
         }
 
         /// <summary>
-        /// Возвращает получилось ли удалить тренировку с указанным id или нет
+        /// Возвращает получилось ли удалить обучение с указанным id или нет
         /// </summary>
-        /// <param name="workoutPlanId">Идентификатор тренировки</param>
+        /// <param name="studyId">Идентификатор обучения</param>
         [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpDelete("[action]/{workoutPlanId}")]
-        public async Task<ActionResult<bool>> DeleteWorkoutPlan(int workoutPlanId)
+        [HttpDelete("[action]/{studyId}")]
+        public async Task<ActionResult<bool>> DeleteStudy(int studyId)
         {
             try
             {
-                return Ok(await _workoutService.DeleteWorkoutPlan(workoutPlanId));
+                return Ok(await _studyService.DeleteStudy(studyId));
             }
             catch (NotFoundException e)
             {
@@ -186,17 +164,17 @@ namespace Akosta.API.Controllers
         }
 
         /// <summary>
-        /// Возвращает получилось ли удалить все тренировки у пользователя с указанным id или нет
+        /// Возвращает получилось ли удалить все обучения у пользователя с указанным id или нет
         /// </summary>
         /// <param name="userId">Идентификатор пользователя</param>
         [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpDelete("[action]/{userId}")]
-        public async Task<ActionResult<bool>> DeleteAllWorkoutPlan(int userId)
+        public async Task<ActionResult<bool>> DeleteAllStudy(int userId)
         {
             try
             {
-                return Ok(await _workoutService.DeleteAllWorkoutPlan(userId));
+                return Ok(await _studyService.DeleteAllStudy(userId));
             }
             catch (NotFoundException e)
             {
@@ -205,26 +183,26 @@ namespace Akosta.API.Controllers
         }
 
 
-        private StudyInformationDto ConvertToWorkoutInformationDto(WorkoutInformationBlo workoutInformationBlo)
+        private StudyInformationDto ConvertToStudyInformationDto(StudyInformationBlo studyInformationBlo)
         {
-            if (workoutInformationBlo == null)
-                throw new ArgumentNullException(nameof(workoutInformationBlo));
+            if (studyInformationBlo == null)
+                throw new ArgumentNullException(nameof(studyInformationBlo));
 
-            StudyInformationDto workoutInformationDto = _mapper.Map<StudyInformationDto>(workoutInformationBlo);
-            return workoutInformationDto;
+            StudyInformationDto studyInformationDto = _mapper.Map<StudyInformationDto>(studyInformationBlo);
+            return studyInformationDto;
         }
 
-        private List<StudyInformationDto> ConvertToListWorkoutInformationDto(List<WorkoutInformationBlo> workoutInformationBlos)
+        private List<StudyInformationDto> ConvertToListWorkoutInformationDto(List<StudyInformationBlo> studyInformationBlos)
         {
-            if (workoutInformationBlos == null)
-                throw new ArgumentNullException(nameof(workoutInformationBlos));
+            if (studyInformationBlos == null)
+                throw new ArgumentNullException(nameof(studyInformationBlos));
 
-            List<StudyInformationDto> workoutInformationDtos = new List<StudyInformationDto>();
-            for (int i = 0; i < workoutInformationBlos.Count; i++)
+            List<StudyInformationDto> studyInformationDtos = new List<StudyInformationDto>();
+            for (int i = 0; i < studyInformationBlos.Count; i++)
             {
-                workoutInformationDtos.Add(ConvertToWorkoutInformationDto(workoutInformationBlos[i]));
+                studyInformationDtos.Add(ConvertToStudyInformationDto(studyInformationBlos[i]));
             }
-            return workoutInformationDtos;
+            return studyInformationDtos;
         }
     }
 }

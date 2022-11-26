@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Akosta.BusinessLogic.Core.Interfaces;
 using Akosta.BusinessLogic.Core.Models;
@@ -22,10 +24,10 @@ namespace Akosta.BusinessLogic.Services
 
         public async Task<UserInformationBlo> RegistrationUser(UserRegistrBlo userRegistrBlo)
         {
-            bool result = await _context.Users.AnyAsync(y => y.Telegram == userRegistrBlo.Telegram);
-
             if (!userRegistrBlo.Telegram.Contains("@")) throw new BadRequestException($"Вы неправильно ввели Телеграм");
 
+            bool result = await _context.Users.AnyAsync(y => y.Telegram == userRegistrBlo.Telegram);
+            
             if (result == true) throw new BadRequestException($"Пользователь с телеграмом {userRegistrBlo.Telegram} уже зарегистрирован");
 
             if (userRegistrBlo.Telegram == null || userRegistrBlo.Name == null || userRegistrBlo.Surname == null ||
@@ -75,6 +77,27 @@ namespace Akosta.BusinessLogic.Services
             return ConvertToUserInformationBlo(user);
         }
 
+        public async Task<List<UserInformationBlo>> GetAllUserOfCriteria(UserCritetiaBlo userCritetiaBlo)
+        {
+            string[] subs = userCritetiaBlo.Critetia.Split(' ');
+            List<UserRto> users = new List<UserRto>();
+            for (int i = 0; i < subs.Length; i++) { 
+                List<UserRto> user = await _context.Users
+                    .Where(e => e.Skill == subs[i])
+                    .ToListAsync();
+                for (int j = 0; j < user.Count; j++) {
+                    users.Add(user[j]);
+                }
+            }
+
+            if (users.Count == 0)
+                throw new NotFoundException($"Нет пользователей с такими критериями");
+
+            users.Reverse();
+
+            return ConvertToUserInfoBloList(users);
+        }
+
         public async Task<bool> DoesExistUser(int userId)
         {
             bool result = await _context.Users.AnyAsync(y => y.Id == userId);
@@ -98,6 +121,20 @@ namespace Akosta.BusinessLogic.Services
             return false;
         }
 
+
+        private List<UserInformationBlo> ConvertToUserInfoBloList(List<UserRto> userRtos)
+        {
+            if (userRtos == null)
+                throw new ArgumentNullException(nameof(userRtos));
+
+            List<UserInformationBlo> userInformationBlo = new List<UserInformationBlo>();
+            for (int i = 0; i < userRtos.Count; i++)
+            {
+                userInformationBlo.Add(_mapper.Map<UserInformationBlo>(userRtos[i]));
+            }
+
+            return userInformationBlo;
+        }
 
         private UserInformationBlo ConvertToUserInformationBlo(UserRto userRto)
         {

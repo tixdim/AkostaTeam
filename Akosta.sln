@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akosta", "Akosta\Akosta.csproj", "{6A393407-2E23-4E1B-8BCB-3AE5902E2877}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Akosta", "Akosta\Akosta.csproj", "{6A393407-2E23-4E1B-8BCB-3AE5902E2877}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

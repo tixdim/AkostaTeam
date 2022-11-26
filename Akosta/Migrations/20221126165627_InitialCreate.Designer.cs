@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Akosta.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    [Migration("20221125204327_InitialCreate")]
+    [Migration("20221126165627_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

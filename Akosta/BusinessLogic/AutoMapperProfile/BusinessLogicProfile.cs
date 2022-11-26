@@ -27,9 +27,9 @@ namespace Akosta.BusinessLogic.AutoMapperProfile
 
             CreateMap<UserIdentityDto, UserIdentityBlo>();
 
-            CreateMap<UserInformationBlo, UserInformationDto>();
+            CreateMap<UserCritetiaDto, UserCritetiaBlo>();
 
-            CreateMap<StudyAddDto, StudyAddBlo>();
+            CreateMap<UserInformationBlo, UserInformationDto>();
 
             CreateMap<StudyAddDto, StudyAddBlo>();
 

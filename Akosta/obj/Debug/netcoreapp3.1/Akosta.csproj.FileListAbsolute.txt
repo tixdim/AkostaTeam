@@ -72,3 +72,5 @@ D:\Documents\GitHub\AkostaTeam\Akosta\obj\Debug\netcoreapp3.1\Akosta.csproj.Copy
 D:\Documents\GitHub\AkostaTeam\Akosta\obj\Debug\netcoreapp3.1\Akosta.dll
 D:\Documents\GitHub\AkostaTeam\Akosta\obj\Debug\netcoreapp3.1\Akosta.pdb
 D:\Documents\GitHub\AkostaTeam\Akosta\obj\Debug\netcoreapp3.1\Akosta.genruntimeconfig.cache
+D:\Documents\GitHub\AkostaTeam\Akosta\bin\Debug\netcoreapp3.1\Akosta.xml
+D:\Documents\GitHub\AkostaTeam\Akosta\obj\Debug\netcoreapp3.1\Akosta.xml

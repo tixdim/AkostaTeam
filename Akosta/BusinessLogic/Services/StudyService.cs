@@ -27,6 +27,9 @@ namespace Akosta.BusinessLogic.Services
             if (studyAddBlo == null)
                 throw new ArgumentNullException(nameof(studyAddBlo));
 
+            bool result = await _context.Studys.AnyAsync(y => y.SkillsInCource == studyAddBlo.SkillsInCource);
+
+            if (result == true) throw new BadRequestException($"Скиллу {studyAddBlo.SkillsInCource} вы уже обучались ранее");
 
             UserRto userRto = await _context.Users
                 .FirstOrDefaultAsync(x => x.Id == studyAddBlo.UserId);
